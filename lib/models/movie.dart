@@ -1,30 +1,22 @@
 class Movie {
   final int id;
   final String title;
-  final String? director;
-  final int year;
+  final String posterUrl;
   final double rating;
+  final int year;
   final String? genre;
-  final String? description;
-  final List<String>? cast;
-  final String? runtime;
-  final List<String>? genres;
-  final String? savedDate;
-  final String? posterUrl;
+  final String? overview;
+  final String? backdropUrl;
 
   Movie({
     required this.id,
     required this.title,
-    this.director,
-    required this.year,
+    required this.posterUrl,
     required this.rating,
+    required this.year,
     this.genre,
-    this.description,
-    this.cast,
-    this.runtime,
-    this.genres,
-    this.savedDate,
-    this.posterUrl,
+    this.overview,
+    this.backdropUrl,
   });
 }
 
