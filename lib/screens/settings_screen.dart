@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'tag_settings_screen.dart';
 import 'account_settings_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -22,13 +21,13 @@ class SettingsScreen extends StatelessWidget {
             },
           ),
           _buildSettingSection(
-            title: '취향 태그',
+            title: '선호 영화 장르',
             icon: Icons.tag,
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => TagSettingsScreen()),
-              );
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(builder: (context) => TagSettingsScreen()),
+              // );
             },
           ),
           _buildSettingSection(
@@ -49,12 +48,6 @@ class SettingsScreen extends StatelessWidget {
           _buildSettingSection(
             title: '앱 정보',
             icon: Icons.info,
-            onTap: () {},
-          ),
-          _buildSettingSection(
-            title: '로그아웃',
-            icon: Icons.logout,
-            textColor: Colors.red,
             onTap: () {},
           ),
         ],

@@ -1,12 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'settings_screen.dart';
+import '../services/auth_api.dart';
+import '../providers/auth_provider.dart';
 
 class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final authProv = Provider.of<AuthProvider>(context, listen: false);
+    final user = authProv.currentUser!;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('프로필'),
+        automaticallyImplyLeading: false,
+        iconTheme: IconThemeData(color: Colors.white),
+        title: Text(
+          'Profile',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         actions: [
           IconButton(
             icon: Icon(Icons.settings),
@@ -24,14 +39,14 @@ class ProfileScreen extends StatelessWidget {
           SizedBox(height: 20),
           Center(
             child: CircleAvatar(
-              radius: 50,
+              radius: 30,
               backgroundImage: NetworkImage('https://via.placeholder.com/100'),
             ),
           ),
           SizedBox(height: 16),
           Center(
             child: Text(
-              '사용자',
+              user.name,
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 20,
@@ -42,7 +57,7 @@ class ProfileScreen extends StatelessWidget {
           SizedBox(height: 8),
           Center(
             child: Text(
-              'user@example.com',
+              user.email,
               style: TextStyle(
                 color: Colors.grey,
                 fontSize: 14,
@@ -51,24 +66,31 @@ class ProfileScreen extends StatelessWidget {
           ),
           SizedBox(height: 32),
           _buildProfileSection(
-            title: '내가 본 영화',
-            icon: Icons.movie,
-            onTap: () {},
+            title: '계정 설정',
+            icon: Icons.settings,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SettingsScreen()),
+              );
+            },
           ),
-          _buildProfileSection(
-            title: '찜한 목록',
-            icon: Icons.favorite,
-            onTap: () {},
-          ),
-          _buildProfileSection(
-            title: '리뷰 관리',
-            icon: Icons.rate_review,
-            onTap: () {},
-          ),
-          _buildProfileSection(
-            title: '결제 내역',
-            icon: Icons.payment,
-            onTap: () {},
+          ListTile(
+            leading: Icon(Icons.logout, color: Colors.white),
+            title: Text('로그아웃', style: TextStyle(color: Colors.white)),
+            onTap: () async {
+              final authApi = Provider.of<AuthApi>(context, listen: false);
+              try {
+                await authApi.logout();
+                // 로그인 화면으로 완전 교체
+                Navigator.pushReplacementNamed(context, '/login');
+              } catch (e) {
+                // 에러 핸들링: 토스트 등
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('로그아웃 중 오류가 발생했습니다.')),
+                );
+              }
+            },
           ),
         ],
       ),

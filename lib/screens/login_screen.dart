@@ -1,9 +1,27 @@
 import 'package:flutter/material.dart';
-import 'tag_selection_screen.dart';
+import 'package:provider/provider.dart';
 
-class RegisterScreen extends StatelessWidget {
+import '../providers/auth_provider.dart';
+import 'register_screen.dart';
+
+
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  String? _errorMessage;
+
   @override
   Widget build(BuildContext context) {
+    final authProv = Provider.of<AuthProvider>(context, listen: false);
+
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -13,7 +31,7 @@ class RegisterScreen extends StatelessWidget {
             children: [
               SizedBox(height: 40),
               Text(
-                '회원가입',
+                '로그인',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 24,
@@ -22,6 +40,8 @@ class RegisterScreen extends StatelessWidget {
               ),
               SizedBox(height: 20),
               TextField(
+                controller: _emailController,
+                style: TextStyle(color: Colors.black),
                 decoration: InputDecoration(
                   hintText: '이메일',
                   hintStyle: TextStyle(color: Colors.grey),
@@ -29,21 +49,69 @@ class RegisterScreen extends StatelessWidget {
               ),
               SizedBox(height: 16),
               TextField(
+                controller: _passwordController,
                 obscureText: true,
+                style: TextStyle(color: Colors.black),
                 decoration: InputDecoration(
-                  hintText: '비밀번호 (영문, 숫자, 특수문자 포함 8자 이상)',
-                  hintStyle: TextStyle(color: Colors.grey, fontSize: 14),
+                  hintText: '비밀번호',
+                  hintStyle: TextStyle(color: Colors.grey),
                 ),
               ),
               SizedBox(height: 24),
               ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => TagSelectionScreen()),
-                  );
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFF162D3A),
+                  side: BorderSide(color: Color(0xFF0296E5)),
+                ),
+                onPressed: () async {
+                  final email = _emailController.text.trim();
+                  final password = _passwordController.text.trim();
+                  try {
+                    await authProv.login(email: email, password: password, context: context);
+                    Navigator.pushReplacementNamed(context, '/home');
+                  } catch (e) {
+                    setState(() {
+                      _errorMessage = '로그인 실패: ${e.toString()}';
+                    });
+                  }
                 },
-                child: Text('다음으로'),
+                child: Text(
+                  '로그인',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+              if (_errorMessage != null) ...[
+                SizedBox(height: 12),
+                Text(
+                  _errorMessage!,
+                  style: TextStyle(color: Colors.red),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    '계정이 없으신가요? ',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => RegisterScreen()),
+                      );
+                    },
+                    child: Text(
+                      '회원가입하기',
+                      style: TextStyle(
+                        color: Colors.blue,
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+                ],
               ),
               Spacer(),
             ],
