@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/movie.dart';
+import '../models/movie_detail.dart';
 import '../widgets/movie_list_item.dart';
+import '../services/movie_api.dart';
 import 'movie_detail_screen.dart';
+import 'home_screen.dart';
 
 class SearchScreen extends StatefulWidget {
   @override
@@ -10,60 +14,83 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
-  List<String> recentSearches = ['스파이더맨', '마블', '액션'];
-  List<String> popularSearches = ['스파이더맨', '이터널스', '베놈 2', '듄'];
+  late MovieApi _movieApi;
 
-  List<Movie> searchResults = [
-    Movie(
-      id: 1,
-      title: '스파이더맨: 노 웨이 홈',
-      posterUrl: 'https://image.tmdb.org/t/p/w500/voddFVdjUoAtfoZZp2RUmuZILDI.jpg',
-      rating: 4.5,
-      year: 2021,
-      genre: '액션, 모험, SF',
-    ),
-    Movie(
-      id: 7,
-      title: '스파이더맨: 파 프롬 홈',
-      posterUrl: 'https://image.tmdb.org/t/p/w500/lcq8dVxeeOqHvvgcte707K0KVx5.jpg',
-      rating: 4.3,
-      year: 2019,
-      genre: '액션, 모험, SF',
-    ),
-  ];
+  List<String> recentSearches = [];
+  List<String> popularSearches = [];
+
+  List<Movie> searchResults = [];
 
   bool _isSearching = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _movieApi = Provider.of<MovieApi>(context, listen: false);
+  }
+
+  Future<void> _performSearch(String query) async {
+    final results = await _movieApi.search(query, limit: 30);
+    setState(() {
+      searchResults = results;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        // Back button navigates back to HomeScreen
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => HomeScreen()),
+            );
+          },
+        ),
+        // Ensure icons are white
+        iconTheme: IconThemeData(color: Colors.white),
+        // Title: show TextField when searching, otherwise 'Search'
         title: _isSearching
             ? TextField(
           controller: _searchController,
           autofocus: true,
           style: TextStyle(color: Colors.white),
           decoration: InputDecoration(
+            filled: true,
+            fillColor: Color(0xFF1C2732),
             hintText: '영화 검색...',
-            hintStyle: TextStyle(color: Colors.grey),
+            hintStyle: TextStyle(color: Colors.grey[400]),
             border: InputBorder.none,
+            contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
           ),
-          onSubmitted: (value) {
-            // Perform search
-            setState(() {
-              if (value.isNotEmpty && !recentSearches.contains(value)) {
-                recentSearches.insert(0, value);
-                if (recentSearches.length > 5) {
-                  recentSearches.removeLast();
+          onSubmitted: (value) async {
+            if (value.isNotEmpty) {
+              setState(() {
+                if (!recentSearches.contains(value)) {
+                  recentSearches.insert(0, value);
+                  if (recentSearches.length > 5) {
+                    recentSearches.removeLast();
+                  }
                 }
-              }
-            });
+              });
+              // perform real search
+              await _performSearch(value);
+            }
           },
         )
-            : Text('검색'),
+            : Text('Search',
+              style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+        ),
         actions: [
           IconButton(
-            icon: Icon(_isSearching ? Icons.close : Icons.search),
+            icon: Icon(_isSearching ? Icons.close : Icons.search, color: Colors.white),
             onPressed: () {
               setState(() {
                 _isSearching = !_isSearching;
@@ -164,7 +191,7 @@ class _SearchScreenState extends State<SearchScreen> {
             runSpacing: 8,
             children: popularSearches.map((search) {
               return GestureDetector(
-                onTap: () {
+                onTap: () async {
                   setState(() {
                     _searchController.text = search;
                     _isSearching = true;
@@ -175,6 +202,8 @@ class _SearchScreenState extends State<SearchScreen> {
                       }
                     }
                   });
+                  // perform real search
+                  await _performSearch(search);
                 },
                 child: Container(
                   decoration: BoxDecoration(
@@ -196,21 +225,34 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Widget _buildSearchResults() {
-    return ListView.builder(
+    return GridView.builder(
+      padding: const EdgeInsets.all(16),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        mainAxisSpacing: 16,
+        crossAxisSpacing: 16,
+        childAspectRatio: 0.67,
+      ),
       itemCount: searchResults.length,
       itemBuilder: (context, index) {
-        return MovieListItem(
-          movie: searchResults[index],
-          onTap: () {
+        final movie = searchResults[index];
+        return GestureDetector(
+          onTap: () async {
+            final MovieDetail detail = await _movieApi.fetchDetail(movie.id);
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => MovieDetailScreen(
-                  movie: searchResults[index],
-                ),
+                builder: (_) => MovieDetailScreen(movieDetail: detail),
               ),
             );
           },
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.network(
+              movie.posterUrl,
+              fit: BoxFit.cover,
+            ),
+          ),
         );
       },
     );

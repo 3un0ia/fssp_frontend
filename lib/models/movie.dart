@@ -3,10 +3,7 @@ class Movie {
   final String title;
   final String posterUrl;
   final double rating;
-  final int year;
-  final String? genre;
-  final String? overview;
-  final String? backdropUrl;
+  final String year;
 
   Movie({
     required this.id,
@@ -14,23 +11,31 @@ class Movie {
     required this.posterUrl,
     required this.rating,
     required this.year,
-    this.genre,
-    this.overview,
-    this.backdropUrl,
   });
+
+
+  // JSON → Movie 객체
+  factory Movie.fromJson(Map<String, dynamic> json) {
+    return Movie(
+      id: json['id'] as int,
+      title: json['title'] as String,
+      posterUrl: json['posterUrl'] as String,
+      rating: (json['rating'] as num).toDouble(),
+      year: json['year'] as String,
+    );
+  }
+
+  // Movie 객체 → JSON (필요 시)
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'posterUrl': posterUrl,
+      'rating': rating,
+      'year': year,
+    };
+  }
 }
 
-class Review {
-  final int id;
-  final String user;
-  final double rating;
-  final String comment;
 
-  Review({
-    required this.id,
-    required this.user,
-    required this.rating,
-    required this.comment,
-  });
-}
 
