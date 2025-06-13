@@ -1,33 +1,35 @@
 import 'package:flutter/material.dart';
 
 class CastList extends StatelessWidget {
+  final List<String> cast;
+  const CastList(this.cast, {Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    final castMembers = [
-      {'name': '톰 홀랜드', 'character': '피터 파커 / 스파이더맨', 'image': 'https://via.placeholder.com/100'},
-      {'name': '젠데이아', 'character': 'MJ', 'image': 'https://via.placeholder.com/100'},
-      {'name': '베네딕트 컴버배치', 'character': '닥터 스트레인지', 'image': 'https://via.placeholder.com/100'},
-      {'name': '제이콥 배덜런', 'character': '네드 리즈', 'image': 'https://via.placeholder.com/100'},
-    ];
-
     return Container(
       height: 120,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: castMembers.length,
+        itemCount: cast.length,
         itemBuilder: (context, index) {
+          final actorName = cast[index];
           return Container(
             width: 80,
             margin: EdgeInsets.only(right: 12),
             child: Column(
               children: [
+                // 배우 이름 첫 글자를 원 안에 표시
                 CircleAvatar(
                   radius: 30,
-                  backgroundImage: NetworkImage(castMembers[index]['image']!),
+                  backgroundColor: Colors.grey[800],
+                  child: Text(
+                    actorName.isNotEmpty ? actorName[0] : '',
+                    style: TextStyle(color: Colors.white, fontSize: 24),
+                  ),
                 ),
                 SizedBox(height: 8),
                 Text(
-                  castMembers[index]['name']!,
+                  actorName,
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 12,
@@ -37,15 +39,14 @@ class CastList extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
+                // 캐릭터 정보가 없으므로 배우 이름 아래에는 공백 혹은 생략
+                SizedBox(height: 4),
                 Text(
-                  castMembers[index]['character']!,
+                  '',
                   style: TextStyle(
                     color: Colors.grey,
                     fontSize: 10,
                   ),
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),

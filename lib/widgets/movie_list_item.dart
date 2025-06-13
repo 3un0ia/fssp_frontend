@@ -41,15 +41,6 @@ class MovieListItem extends StatelessWidget {
                       fontSize: 16,
                     ),
                   ),
-                  SizedBox(height: 4),
-                  Text(
-                    movie.genre ?? '액션, 모험, SF',
-                    style: TextStyle(
-                      color: Colors.grey,
-                      fontSize: 14,
-                    ),
-                  ),
-                  SizedBox(height: 4),
                   Row(
                     children: [
                       Icon(
